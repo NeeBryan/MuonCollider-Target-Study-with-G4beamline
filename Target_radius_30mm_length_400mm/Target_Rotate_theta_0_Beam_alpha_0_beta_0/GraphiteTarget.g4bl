@@ -1,4 +1,6 @@
-# GraphiteTarget.g4bl - 8 GeV proton beam into a tungsten target
+# GraphiteTarget.g4bl - 8 GeV proton beam into a graphite target
+
+randomseed Set 123456
 
 # The "default" physics list is QGSP_BERT
 physics QGSP_BERT
@@ -35,8 +37,14 @@ trackcuts keep=mu+,mu-,pi+,pi-,kaon+,kaon-,proton,neutron,gamma
 virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
 place Det z=3000 rename=Det_0mm_Solenoid
 
+virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
+place Det z=1000 rename=Det__2000mm_Solenoid
+
 virtualdetector Det_Target_Side radius=31.5 innerRadius=31 length=402 color=0.0,0.0,0.0,0.0 format=Extended
 place Det_Target_Side z=2000
+
+# Records proton (PDGid 2212), Pions (PDGid +-211) data every 10 mm from z=1800 to 2200 mm in root format
+zntuple zloop=1800:2200:10 format=rootExtended file='zntuple' require='PDGid==2212 || PDGid==211 || PDGid==-211'
 
 sample Det_Target_Inside radius=31 dir=0 format=Extended
 place Det_Target_Inside z=1800 rename=Det_Target_Inside_0mm
