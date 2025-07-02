@@ -1,0 +1,92 @@
+# TungstenTarget.g4bl - 8 GeV proton beam into a tungsten target
+
+# The "default" physics list is QGSP_BERT
+physics QGSP_BERT
+
+# The output root file name
+param histoFile=TungstenTarget-50x50x600_Solenoid-4T-3000x12500.root
+
+# the beam is 8 GeV kinetic energy, the mass of a proton is 938.272 MeV/c^2
+param M=938.272 KE=8000.0
+param P=sqrt(($M+$KE)*($M+$KE)-$M*$M)
+
+# a zero-emittance beam is unrealistic, but simple; it easily fits through
+# a 1 mm hole in the backward detector. It emanates from z=0.
+beam gaussian meanMomentum=$P nEvents=10000 particle=proton beamZ=0.0 \
+ sigmaX=10.0 sigmaY=10.0 sigmaXp=0.0 sigmaYp=0.0 \
+ meanT=0.0 sigmaT=0.0
+
+# BeamVis just shows where the beam comes from
+box BeamVis width=100.0 height=100.0 length=0.1 material=Vacuum color=1,1,0
+place BeamVis z=0
+
+# the target is a tungsten box 5x5x100 cm^3 make it orange
+box Target height=50 width=50 length=600 material=W color=1,0.5,0
+place Target z=900
+
+### Set particle colors: Green for mu+; Dark green for mu-; Red for pi+; Dark red for pi-;
+###                      Blue for kaon+; Dark blue for kaon-; Yellow for protons; Gray for neutron
+###                      Cyan for photon;
+particlecolor mu+=0,1,0 mu-=0,0.5,0 pi+=1,0,0 pi-=0.5,0,0 \
+              kaon+=0,0,1 kaon-=0,0,0.5 proton=1,1,0 neutron=0.6,0.6,0.6 gamma=0,0.5,1
+trackcuts keep=mu+,mu-,pi+,pi-,kaon+,kaon-,proton,neutron,gamma
+
+virtualdetector Det radius=5000 color=1,0.5,1
+place Det z=900 rename=Det_-30cm_Solenoid
+place Det z=5200 rename=Det_400cm_Solenoid
+place Det z=7200 rename=Det_600cm_Solenoid
+place Det z=9200 rename=Det_800cm_Solenoid
+place Det z=11200 rename=Det_1000cm_Solenoid
+place Det z=13100 rename=Det_1190cm_Solenoid
+place Det z=21200 rename=Det_2000cm_Solenoid
+place Det z=31200 rename=Det_3000cm_Solenoid
+place Det z=41200 rename=Det_4000cm_Solenoid
+
+# Define a solenoid coil for capturing and guiding muons
+coil MuonCaptureCoil innerRadius=3000 outerRadius=3500 length=12500 nSheets=2000 material=Cu
+
+# Generate a solenoid field using the coil
+solenoid MuonSolenoid coilName=MuonCaptureCoil current=45/6 color=0,1,1,0.3
+
+# Place the solenoid after the tungsten target
+place MuonSolenoid z=6850
+
+# Define a helical dipole magnet with a solenoid component
+#helicaldipole MuonHelix radius=5000 length=44000 bD=0.1 lambda=1000 phi0=90 Bsolenoid=10.0 bQ=0.05
+
+# Place the helical dipole magnet after the solenoid
+#place MuonHelix z=23200
+
+# Add a hollow tube to visualize the helical dipole field
+#tube HelixVisual innerRadius=5000 outerRadius=5500 length=44000 material=Vacuum color=0,1,1,0.3
+#place HelixVisual z=23200
+
+
+# These three virtualdetector-s catch everything that comes out, except for
+# a 1mm hole for the incoming beam. Note the 0.5 mm clearance at each end of
+# the target, and the 201 mm length of the cylinder to match corners.
+
+# This virtualdetector catches what comes out of the target to the back;
+# note the hole for the incoming beam; make it yellow
+virtualdetector DetBackward_Solenoid radius=1000 color=0,1,0.0.3
+place DetBackward_Solenoid z=199
+
+# This virtualdetector catches what comes out of the target to the side,
+# one meter away; make it blue
+virtualdetector DetSideways_Solenoid innerRadius=1000 radius=1001 length=1000 color=0,0,1,0.3
+place DetSideways_Solenoid z=700
+
+# This virtualdetector catches what comes out of the target in the forward
+# direction; make it green
+virtualdetector DetForward_Solenoid radius=1000 color=1,0,0,0.3
+place DetForward_Solenoid z=1201
+
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_-50.txt Z0=700 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_400.txt Z0=5200 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_600.txt Z0=7200 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_800.txt Z0=9200 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_1000.txt Z0=11200 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_2000.txt Z0=21200 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_3000.txt Z0=31200 nR=350 dR=10 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_4000.txt Z0=41200 nR=350 dR=10 nZ=1 dZ=1
+
