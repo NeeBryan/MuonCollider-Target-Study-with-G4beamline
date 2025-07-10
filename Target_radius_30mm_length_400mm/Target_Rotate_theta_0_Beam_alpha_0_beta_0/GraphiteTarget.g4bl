@@ -35,13 +35,20 @@ particlecolor mu+=0,1,0 mu-=0,0.5,0 pi+=1,0,0 pi-=0.5,0,0 \
 trackcuts keep=mu+,mu-,pi+,pi-,kaon+,kaon-,proton,neutron,gamma
 
 virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
-place Det z=3000 rename=Det_0mm_Solenoid
+place Det z=3000 rename=Det_Solenoid_1
+place Det z=5000 rename=Det_Solenoid_2
 
 virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
 place Det z=1000 rename=Det__2000mm_Solenoid
 
-virtualdetector Det_Target_Side radius=31.5 innerRadius=31 length=402 color=0.0,0.0,0.0,0.0 format=Extended
+virtualdetector Det_Target_Front radius=31.5 color=1.0,0.5,1.0,0.4 format=Extended
+place Det_Target_Front z=1798.5
+
+virtualdetector Det_Target_Side radius=31.5 innerRadius=31 length=402 color=1.0,0.5,1.0,0.4 format=Extended
 place Det_Target_Side z=2000
+
+virtualdetector Det_Target_End radius=31.5 color=1.0,0.5,1.0,0.4 format=Extended
+place Det_Target_End z=2201.5
 
 # Records proton (PDGid 2212), Pions (PDGid +-211) data every 10 mm from z=1800 to 2200 mm in root format
 zntuple zloop=1800:2200:10 format=rootExtended file='zntuple' require='PDGid==2212 || PDGid==211 || PDGid==-211'
@@ -61,11 +68,12 @@ place Det_Target_Inside z=2200 rename=Det_Target_Inside_400mm
 coil MuonCaptureCoil innerRadius=700 outerRadius=750 length=2000 nSheets=2000 material=Cu
 
 # Generate a solenoid field using the coil
-solenoid MuonSolenoid coilName=MuonCaptureCoil current=98.68 color=0,1,1,0.0
+solenoid MuonSolenoid_1 coilName=MuonCaptureCoil current=98.68 color=0,1,1,0.0
+solenoid MuonSolenoid_2 coilName=MuonCaptureCoil current=59.208 color=0,1,1,0.0
 
 # Place the solenoid over the tungsten target
-place MuonSolenoid z=2000
-
+place MuonSolenoid_1 z=2000
+place MuonSolenoid_2 z=4000.1
 # Define a helical dipole magnet with a solenoid component
 #helicaldipole MuonHelix radius=5000 length=44000 bD=0.1 lambda=1000 phi0=90 Bsolenoid=10.0 bQ=0.05
 
@@ -81,7 +89,10 @@ place MuonSolenoid z=2000
 # a 1mm hole for the incoming beam. Note the 0.5 mm clearance at each end of
 # the target, and the 201 mm length of the cylinder to match corners.
 
-printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_-1000mm.txt Z0=2000 nR=350 dR=2 nZ=1 dZ=1
-printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_-200mm.txt Z0=2800 nR=350 dR=2 nZ=1 dZ=1
-printfield type=cylinder field=Bz file=solenoid_field_cylinder_Z0_-1800mm.txt Z0=1200 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_0mm.txt Z0=2000 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_800mm.txt Z0=2800 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_-800mm.txt Z0=1200 nR=350 dR=2 nZ=1 dZ=1
 
+printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_0mm.txt Z0=4000 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_800mm.txt Z0=4800 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_-800mm.txt Z0=3200 nR=350 dR=2 nZ=1 dZ=1
