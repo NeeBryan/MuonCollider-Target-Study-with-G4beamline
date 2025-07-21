@@ -8,16 +8,20 @@ physics QGSP_BERT
 # the beam is 8 GeV kinetic energy, the mass of a proton is 938.272 MeV/c^2
 param M=938.272 KE=8000.0
 param P=sqrt(($M+$KE)*($M+$KE)-$M*$M)
+param theta=0
+param alpha=0
+param beta=0
+param beamXval=2000*tan($theta*degree)
 
 # a zero-emittance beam is unrealistic, but simple; it easily fits through
 # a 1 mm hole in the backward detector. It emanates from z=0.
-beam gaussian meanMomentum=$P nEvents=50000 particle=proton beamZ=0.0 \
+beam gaussian meanMomentum=$P nEvents=50000 particle=proton beamZ=0.0 beamX=$beamXval beamY=0.0\
  sigmaX=1.0 sigmaY=1.0 sigmaXp=0.0 sigmaYp=0.0 \
- meanT=0.0 sigmaT=0.0
+ meanT=0.0 sigmaT=0.0 rotation=Y-$alpha,Z-$beta 
 
 # BeamVis just shows where the beam comes from
 box BeamVis width=100.0 height=100.0 length=0.1 material=Vacuum color=1,1,0
-place BeamVis z=0
+place BeamVis z=0.0 x=$beamXval y=0.0
 
 # Trace ~10% of primary protons with extended info into one ROOT file
 trace RandomSampleTrace nTrace=50000 oneNTuple=1 format=rootExtended \
@@ -25,7 +29,7 @@ trace RandomSampleTrace nTrace=50000 oneNTuple=1 format=rootExtended \
 
 # the target is a tungsten box 5x5x100 cm^3 make it orange
 cylinder Target outerRadius=30 length=400 material=GRAPHITE color=1,0.5,0,0.3
-place Target z=2000
+place Target z=2000 rotation=Y-$theta
 
 ### Set particle colors: Green for mu+; Dark green for mu-; Red for pi+; Dark red for pi-;
 ###                      Blue for kaon+; Dark blue for kaon-; Yellow for protons; Gray for neutron
@@ -42,13 +46,13 @@ virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
 place Det z=1000 rename=Det__2000mm_Solenoid
 
 virtualdetector Det_Target_Front radius=31.5 color=1.0,0.5,1.0,0.4 format=Extended
-place Det_Target_Front z=1798.5
+place Det_Target_Front z=(2000-202*cos($theta*degree)) x=202*sin($theta*degree) rotation=Y-$theta
 
 virtualdetector Det_Target_Side radius=31.5 innerRadius=31 length=402 color=1.0,0.5,1.0,0.4 format=Extended
-place Det_Target_Side z=2000
+place Det_Target_Side z=2000 rotation=Y-$theta
 
 virtualdetector Det_Target_End radius=31.5 color=1.0,0.5,1.0,0.4 format=Extended
-place Det_Target_End z=2201.5
+place Det_Target_End z=(2000+202*cos($theta*degree)) x=-202*sin($theta*degree) rotation=Y-$theta
 
 # Records proton (PDGid 2212), Pions (PDGid +-211) data every 10 mm from z=1800 to 2200 mm in root format
 zntuple zloop=1800:2200:10 format=rootExtended file='zntuple' require='PDGid==2212 || PDGid==211 || PDGid==-211'
@@ -96,3 +100,5 @@ printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_-800mm.txt Z
 printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_0mm.txt Z0=4000 nR=350 dR=2 nZ=1 dZ=1
 printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_800mm.txt Z0=4800 nR=350 dR=2 nZ=1 dZ=1
 printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_-800mm.txt Z0=3200 nR=350 dR=2 nZ=1 dZ=1
+
+fieldntuple FieldAlongZ format=ascii filename=FieldAlongZ.txt z=900,5100,10
