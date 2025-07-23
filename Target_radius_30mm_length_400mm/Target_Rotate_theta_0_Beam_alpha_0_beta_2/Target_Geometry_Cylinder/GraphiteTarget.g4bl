@@ -1,0 +1,104 @@
+# GraphiteTarget.g4bl - 8 GeV proton beam into a graphite target
+
+randomseed Set 123456
+
+# The "default" physics list is QGSP_BERT
+physics QGSP_BERT
+
+# the beam is 8 GeV kinetic energy, the mass of a proton is 938.272 MeV/c^2
+param M=938.272 KE=8000.0
+param P=sqrt(($M+$KE)*($M+$KE)-$M*$M)
+param theta=0
+param alpha=0
+param beta=2
+param beamXval=2000*tan($theta*degree)
+
+# a zero-emittance beam is unrealistic, but simple; it easily fits through
+# a 1 mm hole in the backward detector. It emanates from z=0.
+beam gaussian meanMomentum=$P nEvents=50000 particle=proton beamZ=0.0 beamX=$beamXval beamY=0.0\
+ sigmaX=1.0 sigmaY=1.0 sigmaXp=0.0 sigmaYp=0.0 \
+ meanT=0.0 sigmaT=0.0 rotation=Y-$alpha,Z-$beta 
+
+# BeamVis just shows where the beam comes from
+box BeamVis width=100.0 height=100.0 length=0.1 material=Vacuum color=1,1,0
+place BeamVis z=0.0 x=$beamXval y=0.0
+
+# Trace ~10% of primary protons with extended info into one ROOT file
+trace RandomSampleTrace nTrace=50000 oneNTuple=1 format=rootExtended \
+      primaryOnly=1 
+
+# the target is a tungsten box 5x5x100 cm^3 make it orange
+cylinder Target outerRadius=30 length=400 material=GRAPHITE color=1,0.5,0,0.3
+place Target z=2000 rotation=Y-$theta
+
+### Set particle colors: Green for mu+; Dark green for mu-; Red for pi+; Dark red for pi-;
+###                      Blue for kaon+; Dark blue for kaon-; Yellow for protons; Gray for neutron
+###                      Cyan for photon;
+particlecolor mu+=0,1,0 mu-=0,0.5,0 pi+=1,0,0 pi-=0.5,0,0 \
+              kaon+=0,0,1 kaon-=0,0,0.5 proton=1,1,0 neutron=0.6,0.6,0.6 gamma=0,0.5,1
+trackcuts keep=mu+,mu-,pi+,pi-,kaon+,kaon-,proton,neutron,gamma
+
+virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
+place Det z=3000 rename=Det_Solenoid_1
+place Det z=5000 rename=Det_Solenoid_2
+
+virtualdetector Det radius=700 color=1,0.5,1,1.0 format=Extended
+place Det z=1000 rename=Det__2000mm_Solenoid
+
+virtualdetector Det_Target_Front radius=31.5 color=1.0,0.5,1.0,0.4 format=Extended
+place Det_Target_Front z=(2000-202*cos($theta*degree)) x=202*sin($theta*degree) rotation=Y-$theta
+
+virtualdetector Det_Target_Side radius=31.5 innerRadius=31 length=402 color=1.0,0.5,1.0,0.4 format=Extended
+place Det_Target_Side z=2000 rotation=Y-$theta
+
+virtualdetector Det_Target_End radius=31.5 color=1.0,0.5,1.0,0.4 format=Extended
+place Det_Target_End z=(2000+202*cos($theta*degree)) x=-202*sin($theta*degree) rotation=Y-$theta
+
+# Records proton (PDGid 2212), Pions (PDGid +-211) data every 10 mm from z=1800 to 2200 mm in root format
+zntuple zloop=1800:2200:10 format=rootExtended file='zntuple' require='PDGid==2212 || PDGid==211 || PDGid==-211'
+
+sample Det_Target_Inside radius=31 dir=0 format=Extended
+place Det_Target_Inside z=1800 rename=Det_Target_Inside_0mm
+place Det_Target_Inside z=1850 rename=Det_Target_Inside_50mm
+place Det_Target_Inside z=1900 rename=Det_Target_Inside_100mm
+place Det_Target_Inside z=1950 rename=Det_Target_Inside_150mm
+place Det_Target_Inside z=2000 rename=Det_Target_Inside_200mm
+place Det_Target_Inside z=2050 rename=Det_Target_Inside_250mm
+place Det_Target_Inside z=2100 rename=Det_Target_Inside_300mm
+place Det_Target_Inside z=2150 rename=Det_Target_Inside_350mm
+place Det_Target_Inside z=2200 rename=Det_Target_Inside_400mm
+
+# Define a solenoid coil for capturing and guiding muons
+coil MuonCaptureCoil innerRadius=700 outerRadius=750 length=2000 nSheets=2000 material=Cu
+
+# Generate a solenoid field using the coil
+solenoid MuonSolenoid_1 coilName=MuonCaptureCoil current=98.68 color=0,1,1,0.0
+solenoid MuonSolenoid_2 coilName=MuonCaptureCoil current=59.208 color=0,1,1,0.0
+
+# Place the solenoid over the tungsten target
+place MuonSolenoid_1 z=2000
+place MuonSolenoid_2 z=4000.1
+# Define a helical dipole magnet with a solenoid component
+#helicaldipole MuonHelix radius=5000 length=44000 bD=0.1 lambda=1000 phi0=90 Bsolenoid=10.0 bQ=0.05
+
+# Place the helical dipole magnet after the solenoid
+#place MuonHelix z=23200
+
+# Add a hollow tube to visualize the helical dipole field
+#tube HelixVisual innerRadius=5000 outerRadius=5500 length=44000 material=Vacuum color=0,1,1,0.3
+#place HelixVisual z=23200
+
+
+# These three virtualdetector-s catch everything that comes out, except for
+# a 1mm hole for the incoming beam. Note the 0.5 mm clearance at each end of
+# the target, and the 201 mm length of the cylinder to match corners.
+
+printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_0mm.txt Z0=2000 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_800mm.txt Z0=2800 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_1_field_cylinder_Z0_-800mm.txt Z0=1200 nR=350 dR=2 nZ=1 dZ=1
+
+printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_0mm.txt Z0=4000 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_800mm.txt Z0=4800 nR=350 dR=2 nZ=1 dZ=1
+printfield type=cylinder field=Bz file=solenoid_2_field_cylinder_Z0_-800mm.txt Z0=3200 nR=350 dR=2 nZ=1 dZ=1
+
+fieldntuple FieldAlongZ format=ascii filename=FieldAlongZ.txt z=900,5100,10

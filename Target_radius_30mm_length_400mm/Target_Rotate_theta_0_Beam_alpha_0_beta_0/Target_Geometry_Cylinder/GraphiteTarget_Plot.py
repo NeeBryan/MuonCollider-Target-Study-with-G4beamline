@@ -1229,7 +1229,7 @@ if detector_data["PDGid_Det_Target_Side"] is not None:
     Py_PiMinus_Det_Target_Side = detector_data['Py_Det_Target_Side'][select_piminus_Det_Target_Side]
     Pz_PiMinus_Det_Target_Side = detector_data['Pz_Det_Target_Side'][select_piminus_Det_Target_Side]
 
-    P_PiMinus_Det_Target_Side = np.sqrt(Px_PiMinus_Det_Target_Side**2 + Py_PiMinus_Det_Target_Side**2 + Pz_MuMinus_Det_Target_Side**2)
+    P_PiMinus_Det_Target_Side = np.sqrt(Px_PiMinus_Det_Target_Side**2 + Py_PiMinus_Det_Target_Side**2 + Pz_PiMinus_Det_Target_Side**2)
     
     Pion_Mass = 139.57 # MeV
     # Pions
@@ -1255,7 +1255,7 @@ if detector_data["PDGid_Det_Target_Side"] is not None:
     Proton_Mass = 938.27 # MeV
     
     E_Protons_Det_Target_Side = np.sqrt(Proton_Mass**2 + Px_Protons_Det_Target_Side**2 + Py_Protons_Det_Target_Side**2 + Pz_Protons_Det_Target_Side**2)
-    KE_Protons_Det_Target_Side = E_Protons_Det_Target_Side - Protons_Mass
+    KE_Protons_Det_Target_Side = E_Protons_Det_Target_Side - Proton_Mass
 
     # =======================================================================================
     # Select InitZ
@@ -3765,6 +3765,8 @@ for var in ["Px", "Py", "Pz"]:
 
         plt.savefig(fr"Pions_{var}_Position_of_{save_png_lbl_name}.png")
         plt.show()
+
+import re
 
 
 for phase_var, axes in [("x_px", ("x", "px")), ("y_py", ("y", "py"))]:
